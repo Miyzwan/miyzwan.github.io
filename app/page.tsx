@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect } from "react";
 
 type Project = {
   title: string;
@@ -82,6 +85,55 @@ const skills = [
 ];
 
 export default function Home() {
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (prefersReducedMotion.matches) return;
+
+    const elements = Array.from(document.querySelectorAll<HTMLElement>(".js-scroll-3d"));
+    if (!elements.length) return;
+
+    let ticking = false;
+
+    const update3D = () => {
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
+
+      elements.forEach((element) => {
+        const rect = element.getBoundingClientRect();
+        const centerY = rect.top + rect.height / 2;
+        const centerX = rect.left + rect.width / 2;
+        const yOffset = (centerY - vh / 2) / (vh / 2);
+        const xOffset = (centerX - vw / 2) / (vw / 2);
+        const clampedY = Math.max(-1, Math.min(1, yOffset));
+        const clampedX = Math.max(-1, Math.min(1, xOffset));
+        const depth = Number(element.dataset.depth ?? 18);
+        const lift = Math.max(0, (1 - Math.abs(clampedY)) * depth);
+
+        element.style.setProperty("--tilt-x", `${(-clampedY * 8).toFixed(2)}deg`);
+        element.style.setProperty("--tilt-y", `${(clampedX * 7).toFixed(2)}deg`);
+        element.style.setProperty("--lift-z", `${lift.toFixed(2)}px`);
+      });
+    };
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        update3D();
+        ticking = false;
+      });
+    };
+
+    update3D();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
   return (
     <div className="portfolio-root">
       <header className="site-header">
@@ -128,7 +180,7 @@ export default function Home() {
               From data-driven prototypes to full web applications, I focus on delivering solutions that are technically sound, practical, and ready to evolve.
             </p>
           </div>
-          <div className="profile-card">
+          <div className="profile-card scroll-3d js-scroll-3d" data-depth="22">
             <Image src="/assets/head1.png" alt="Dimas Dwi Ismaunnizam" width={280} height={280} className="profile-image" priority />
             <h3>Based in Jakarta, Indonesia</h3>
             <p>Open to internships, collaborations, and impactful product work.</p>
@@ -152,7 +204,7 @@ export default function Home() {
           <p className="section-intro">A curated look at projects across machine learning, productivity systems, and application engineering.</p>
           <div className="project-grid">
             {projects.map((project) => (
-              <article key={project.title} className="project-card">
+              <article key={project.title} className="project-card scroll-3d js-scroll-3d" data-depth="26">
                 <Image src={project.image} alt={project.title} width={640} height={360} className="project-image" />
                 <div className="project-body">
                   <h3>{project.title}</h3>
@@ -175,7 +227,7 @@ export default function Home() {
           <h2>Experience Highlights</h2>
           <div className="highlight-grid">
             {highlights.map((highlight) => (
-              <article key={highlight.title} className="highlight-card">
+              <article key={highlight.title} className="highlight-card scroll-3d js-scroll-3d" data-depth="16">
                 <h3>{highlight.title}</h3>
                 <p>{highlight.text}</p>
               </article>
