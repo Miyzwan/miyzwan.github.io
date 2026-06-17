@@ -23,7 +23,7 @@ const projects: Project[] = [
       "A forecasting study using LSTM and GRU models on long-range historical market data to evaluate sequence-learning performance in financial trends.",
     stack: ["Python", "TensorFlow", "Scikit-learn"],
     href: "https://github.com/Miyzwan/BTC-Price-Prediction",
-    image: "/assets/SIMRS.png",
+    image: "/assets/bitcoin-forecast.svg",
   },
   {
     title: "Boarding House Manager",
